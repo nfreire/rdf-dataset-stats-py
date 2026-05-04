@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rdf-dataset-stats"
+version = "0.1.0"
+description = "Collect RDF dataset statistics from record-based RDF dumps."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "rdf-dump-reader",
+    "rdflib>=7.0",
+    "openpyxl",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+]
+
+[project.scripts]
+rdf-dataset-stats = "rdf_dataset_stats.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
