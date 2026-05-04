@@ -219,3 +219,9 @@ __marimo__/
 
 #codex tests
 .codex-test-deps/
+
+#app files
+output-dataset-stats.txt
+runInRnd2.sh
+*.xlsx
+
