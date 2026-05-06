@@ -51,11 +51,16 @@ def collect_dump_stats(
     *,
     on_subdataset: Callable[[str], None] | None = None,
     on_progress: Callable[[int, float, float], None] | None = None,
+    on_intermediate_result: Callable[[DatasetStats, int], None] | None = None,
     progress_interval_seconds: float = 300.0,
+    intermediate_record_interval: int = 1_000_000,
     clock: Callable[[], float] = monotonic,
 ) -> tuple[DatasetStats, int]:
     """Collect aggregate statistics from every record in an RDF dump."""
     from rdf_dump_reader import RDFDumpReader
+
+    if intermediate_record_interval <= 0:
+        raise ValueError("intermediate_record_interval must be greater than zero")
 
     stats = DatasetStats()
     reader = RDFDumpReader(
@@ -78,6 +83,12 @@ def collect_dump_stats(
 
         collect_graph_stats(record.graph, stats)
         processed_records += 1
+
+        if (
+            on_intermediate_result is not None
+            and processed_records % intermediate_record_interval == 0
+        ):
+            on_intermediate_result(stats, processed_records)
 
         now = clock()
         if on_progress is not None and now >= next_progress_time:

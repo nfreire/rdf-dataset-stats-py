@@ -261,6 +261,14 @@ Output MUST be deterministic.
 * Properties within each sheet MUST be ordered lexicographically by full property URI
 * Resource object classes for each property MUST be ordered lexicographically by full object class URI
 
+### 8.4 Intermediate output
+
+For long-running dumps, the application MUST write intermediate results to the configured output `.xlsx` file after every 1,000,000 records processed.
+
+Intermediate output MUST use the same workbook structure, sheet naming rules, and deterministic ordering as the final output.
+
+The final output file MUST still be written after processing completes, even if the total number of processed records is not an exact multiple of 1,000,000.
+
 ## 9. Command-Line Interface
 
 The application SHOULD provide a command-line interface.
@@ -381,6 +389,7 @@ Tests MUST cover:
 * Excluding `rdf:type` from property statistics by default
 * Deterministic ordering of output data
 * Writing an `.xlsx` file
+* Writing intermediate `.xlsx` results after every 1,000,000 processed records
 * Creating one worksheet per class
 * Valid and unique Excel sheet names
 * CLI invocation with input and output paths

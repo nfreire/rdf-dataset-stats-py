@@ -140,3 +140,29 @@ def test_cli_suppresses_noisy_rdflib_term_logging(
 
     assert exit_code == 0
     assert logger.level == logging.CRITICAL
+
+
+def test_cli_writes_intermediate_and_final_output(
+    monkeypatch, tmp_path
+) -> None:
+    input_path = tmp_path / "dump"
+    input_path.mkdir()
+    output_path = tmp_path / "stats.xlsx"
+    write_calls: list[Path] = []
+
+    def fake_collect_dump_stats(path: Path, **kwargs):
+        kwargs["on_intermediate_result"](make_stats(), 1_000_000)
+        return make_stats(), 1_000_001
+
+    def fake_write_excel(stats: DatasetStats, path: Path) -> None:
+        write_calls.append(path)
+        path.write_text("xlsx placeholder")
+
+    monkeypatch.setattr(cli, "collect_dump_stats", fake_collect_dump_stats)
+    monkeypatch.setattr(cli, "write_excel", fake_write_excel)
+
+    exit_code = cli.main([str(input_path), str(output_path)])
+
+    assert exit_code == 0
+    assert write_calls == [output_path, output_path]
+    assert output_path.exists()

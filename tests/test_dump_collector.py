@@ -130,6 +130,31 @@ def test_collect_dump_stats_reports_periodic_progress(monkeypatch) -> None:
     ]
 
 
+def test_collect_dump_stats_reports_intermediate_results(monkeypatch) -> None:
+    FakeRDFDumpReader.calls = []
+    FakeRDFDumpReader.records = [
+        FakeRecord(make_graph("ClassA", "First"), subdataset="00719"),
+        FakeRecord(make_graph("ClassA", "Second"), subdataset="00719"),
+        FakeRecord(make_graph("ClassB", "Third"), subdataset="00725"),
+    ]
+    monkeypatch.setitem(
+        __import__("sys").modules,
+        "rdf_dump_reader",
+        SimpleNamespace(RDFDumpReader=FakeRDFDumpReader),
+    )
+    intermediate_results: list[tuple[int, int]] = []
+
+    collector.collect_dump_stats(
+        "dump-folder",
+        on_intermediate_result=lambda stats, processed: intermediate_results.append(
+            (processed, stats[f"{EX}ClassA"].class_count)
+        ),
+        intermediate_record_interval=2,
+    )
+
+    assert intermediate_results == [(2, 2)]
+
+
 def test_collect_dump_stats_reads_real_fixture_dump(caplog) -> None:
     rdf_dump_reader = pytest.importorskip("rdf_dump_reader")
     if not hasattr(rdf_dump_reader, "RDFDumpReader"):

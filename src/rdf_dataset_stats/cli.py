@@ -32,6 +32,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             input_path,
             on_subdataset=_print_subdataset,
             on_progress=_print_progress,
+            on_intermediate_result=lambda stats, processed: write_excel(
+                stats, output_path
+            ),
         )
         write_excel(stats, output_path)
     except Exception as exc:
